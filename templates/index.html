@@ -19,13 +19,13 @@
   <h1>DNS URL Shortener</h1>
   <div class="box">
     <form method="post" action="/">
-      <label for="short">Clave corta (ej. <code>abc</code>)</label>
-      <input id="short" name="short" type="text" placeholder="Introduce la clave corta">
-      <button type="submit">Buscar URL</button>
+      <label for="url">Introduce la URL que quieres acortar</label>
+      <input id="url" name="url" type="text" placeholder="https://ejemplo.com">
+      <button type="submit">Acortar URL</button>
     </form>
 
     <div class="hint">
-      Buscamos el registro TXT en: <strong><code>nombre.tu_dominio</code></strong>.
+      Se creará un registro TXT en: <strong><code>hash.{{ domain }}</code></strong>.
       (Dominio usado: <strong>{{ domain }}</strong>)
     </div>
 
@@ -35,10 +35,9 @@
 
     {% if result %}
       <div class="result">
-        <div><strong>URL encontrada:</strong></div>
+        <div><strong>URL acortada:</strong></div>
         <div><code>{{ result }}</code></div>
-        <p><a href="{{ result }}" target="_blank" rel="noreferrer">Abrir URL en nueva pestaña</a></p>
-        <p>O usar el enlace directo de redirección: <a href="/go/{{ request.form.get('short') }}" target="_blank">/go/{{ request.form.get('short') }}</a></p>
+        <p><a href="/go/{{ result.split('.')[0] }}" target="_blank" rel="noreferrer">Abrir URL redirigida</a></p>
       </div>
     {% endif %}
   </div>
