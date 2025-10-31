@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DNS URL Shortener - Interfaz</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; line-height:1.5; }
+    label { display:block; margin-bottom:8px; font-weight:600; }
+    input[type="text"] { width:100%; padding:8px; margin-bottom:10px; box-sizing:border-box; }
+    button { padding:8px 14px; cursor:pointer; }
+    .box { padding:14px; border:1px solid #ddd; border-radius:6px; background:#fafafa; }
+    .error { color:#a00; margin-top:10px; }
+    .result { margin-top:10px; }
+    .hint { color:#666; font-size:0.9em; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <h1>DNS URL Shortener</h1>
+  <div class="box">
+    <form method="post" action="/">
+      <label for="short">Clave corta (ej. <code>abc</code>)</label>
+      <input id="short" name="short" type="text" placeholder="Introduce la clave corta">
+      <button type="submit">Buscar URL</button>
+    </form>
+
+    <div class="hint">
+      Buscamos el registro TXT en: <strong><code>nombre.tu_dominio</code></strong>.
+      (Dominio usado: <strong>{{ domain }}</strong>)
+    </div>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+      <div class="result">
+        <div><strong>URL encontrada:</strong></div>
+        <div><code>{{ result }}</code></div>
+        <p><a href="{{ result }}" target="_blank" rel="noreferrer">Abrir URL en nueva pestaña</a></p>
+        <p>O usar el enlace directo de redirección: <a href="/go/{{ request.form.get('short') }}" target="_blank">/go/{{ request.form.get('short') }}</a></p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
