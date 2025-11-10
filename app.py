@@ -1,80 +1,70 @@
-from flask import Flask, render_template, request, redirect, abort
-import dns.resolver
-import os
-import hashlib
-import requests
-from requests.auth import HTTPBasicAuth
+from flask import Flask, render_template, request
+import os, hashlib, requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
-# Configuración desde .env
-DOMAIN = os.environ.get("DOMAIN", "jxvx.es")
-API_PREFIX = os.environ.get("IONOS_API_KEY_PREFIX")
-API_SECRET = os.environ.get("IONOS_API_KEY_SECRET")
-auth = HTTPBasicAuth(API_PREFIX, API_SECRET)
+DOMAIN = os.getenv("DOMAIN")
+ZONE_ID = os.getenv("ZONE_ID")
+IONOS_API_KEY = os.getenv("IONOS_API_KEY")
+API_BASE = "https://api.hosting.ionos.com/dns/v1"
 
-# Función para consultar registros TXT
-def get_txt_for_path(path):
-    name = f"{path}.{DOMAIN}"
-    try:
-        answers = dns.resolver.resolve(name, 'TXT')
-    except Exception:
-        return None
-    for r in answers:
-        parts = [p.decode('utf-8') for p in r.strings]
-        return "".join(parts)
-    return None
 
-# Función para añadir registro TXT en IONOS
-def add_txt_record(subdomain, value):
-    url = f'https://api.hosting.ionos.com/dns/v1/domains/{DOMAIN}/records'
-    data = {
-        "name": subdomain,
-        "type": "TXT",
-        "ttl": 3600,
-        "data": value
+def hash_corto(url):
+    return hashlib.sha1(url.encode()).hexdigest()[:6]
+
+
+def crear_txt(hash_code, url):
+
+    headers = {
+        "X-API-Key": IONOS_API_KEY,
+        "Content-Type": "application/json"
     }
-    response = requests.post(url, json=data, auth=auth)
-    if response.status_code in [200, 201]:
-        return True
-    else:
-        print("Error al crear TXT:", response.status_code, response.text)
-        return False
 
-# Página principal con formulario
-@app.route('/', methods=['GET', 'POST'])
+    payload = [
+        {
+        "name": f"{hash_code}.{DOMAIN}",   
+        "type": "TXT",
+        "content": url,
+        "ttl": 300
+        }
+    ]
+
+    r = requests.post(
+        f"{API_BASE}/zones/{ZONE_ID}/records",
+        headers=headers,
+        json=payload
+    )
+
+    print("STATUS:", r.status_code)
+    print("RESPUESTA IONOS:", r.text)
+
+    return r.status_code in (200,201)
+
+
+
+
+@app.route("/", methods=["GET", "POST"])
 def index():
-    result = None
+    hash_generado = None
     error = None
-    if request.method == 'POST':
-        original_url = request.form.get('url', '').strip()
-        if not original_url:
-            error = "Introduce la URL que quieres acortar."
-        elif not (original_url.startswith("http://") or original_url.startswith("https://")):
-            error = "La URL debe empezar por http:// o https://."
+
+    if request.method == "POST":
+        url = request.form.get("url")
+
+        if not url:
+            error = "Introduce una URL"
         else:
-            # Generar un hash corto de la URL
-            hash_object = hashlib.md5(original_url.encode())
-            short_hash = hash_object.hexdigest()[:6]
-
-            # Intentar crear el registro TXT en IONOS
-            success = add_txt_record(short_hash, original_url)
-            if not success:
-                error = "No se pudo crear el registro TXT en IONOS."
+            h = hash_corto(url)
+            if crear_txt(h, url):
+                hash_generado = h
             else:
-                result = f"{short_hash}.{DOMAIN}"
+                error = "Error creando TXT en IONOS"
 
-    return render_template('index.html', domain=DOMAIN, result=result, error=error)
+    return render_template("index.html", hash=hash_generado, domain=DOMAIN, error=error)
 
-# Redirección a URL original
-@app.route('/go/<short>')
-def go_short(short):
-    url = get_txt_for_path(short)
-    if not url:
-        return abort(404, description="Short link no encontrado")
-    if not (url.startswith("http://") or url.startswith("https://")):
-        return abort(500, description="URL en TXT no válida")
-    return redirect(url, code=302)
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)

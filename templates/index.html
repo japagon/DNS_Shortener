@@ -1,44 +1,35 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DNS URL Shortener - Interfaz</title>
+  <meta charset="utf-8">
+  <title>DNS Shortener</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; line-height:1.5; }
-    label { display:block; margin-bottom:8px; font-weight:600; }
-    input[type="text"] { width:100%; padding:8px; margin-bottom:10px; box-sizing:border-box; }
-    button { padding:8px 14px; cursor:pointer; }
-    .box { padding:14px; border:1px solid #ddd; border-radius:6px; background:#fafafa; }
-    .error { color:#a00; margin-top:10px; }
-    .result { margin-top:10px; }
-    .hint { color:#666; font-size:0.9em; margin-top:6px; }
+    body{font-family:Arial;margin:40px auto;max-width:600px;}
+    input{width:100%;padding:10px;margin-top:10px;}
+    button{padding:10px;margin-top:10px;}
+    .box{border:1px solid #ccc;padding:20px;border-radius:8px;}
   </style>
 </head>
 <body>
-  <h1>DNS URL Shortener</h1>
+  <h1>Acortador DNS</h1>
+
   <div class="box">
-    <form method="post" action="/">
-      <label for="url">Introduce la URL que quieres acortar</label>
-      <input id="url" name="url" type="text" placeholder="https://ejemplo.com">
-      <button type="submit">Acortar URL</button>
+    <form method="POST">
+      <p>Introduce la URL completa:</p>
+      <input type="text" name="url" placeholder="https://www.ejemplo.com">
+      <button type="submit">Generar hash</button>
     </form>
 
-    <div class="hint">
-      Se creará un registro TXT en: <strong><code>hash.{{ domain }}</code></strong>.
-      (Dominio usado: <strong>{{ domain }}</strong>)
-    </div>
-
     {% if error %}
-      <div class="error">{{ error }}</div>
+      <p style="color:red;">{{ error }}</p>
     {% endif %}
 
-    {% if result %}
-      <div class="result">
-        <div><strong>URL acortada:</strong></div>
-        <div><code>{{ result }}</code></div>
-        <p><a href="/go/{{ result.split('.')[0] }}" target="_blank" rel="noreferrer">Abrir URL redirigida</a></p>
-      </div>
+    {% if hash %}
+      <h2>Hash generado:</h2>
+      <p><strong>{{ hash }}</strong></p>
+
+      <h3>Prueba tu hash con dig:</h3>
+      <pre>dig +short TXT {{ hash }}.{{ domain }}</pre>
     {% endif %}
   </div>
 </body>
