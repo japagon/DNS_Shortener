@@ -1,93 +1,97 @@
 DNS URL Shortener with Flask and IONOS
-Description
-This project allows shortening URLs using DNS TXT records in IONOS.
-Each time a URL is entered, the system generates a unique hash, creates a TXT record in the configured domain, and allows access through:
+Overview
+
+This project is a simple web application that allows you to shorten URLs using DNS TXT records in your IONOS domain.
+When you submit a URL, the system generates a unique hash, creates a TXT record in your domain (for example jxvx.es), and lets you access it through:
+
 http://localhost:5000/<hash>
 
-When accessing that address, the server queries the TXT record and automatically redirects to the original URL.
 
-Prerequisites
+When that address is visited, the app looks up the TXT record in DNS and automatically redirects to the original URL.
 
+Requirements
 
-IONOS account with a registered domain (for example: jxvx.es).
+Before running the project, make sure you have:
 
+An IONOS account with a registered domain (for example: jxvx.es).
 
-An IONOS API Key with DNS permissions.
+An API Key from IONOS with DNS access permissions.
 
-
-Python 3 installed on the system.
-
-
+Python 3 installed on your system.
 
 Installation
-Clone the repository:
+1. Clone the repository
 git clone https://github.com/your_user/your_repository.git
 cd your_repository
 
-Create and activate a virtual environment:
+2. Create and activate a virtual environment
 python3 -m venv venv
-source venv/bin/activate    # On Linux/Mac
+source venv/bin/activate    # On Linux or Mac
 venv\Scripts\activate       # On Windows
 
-Install the required dependencies:
+3. Install the required packages
 pip install flask requests python-dotenv dnspython
 
+Environment configuration
 
-.env File Configuration
-Create a file named .env in the project root directory with the following content:
+Create a file named .env in the root of the project with the following information:
+
 IONOS_API_KEY=your_ionos_api_key
 ZONE_ID=f7cf9131-b572-11f0-a514-0a58644418eb
 DOMAIN=jxvx.es
 
-Important:
-Do not share your API Key on GitHub or in public documents.
 
-Running the Application
-Run the following command:
+Note:
+Keep your API key private. Do not upload it to GitHub or share it publicly.
+
+Running the application
+
+Start the Flask development server with:
+
 python app.py
 
-You will see a message like this:
+
+You should see a message similar to:
+
 * Running on http://127.0.0.1:5000
 
-Then, open your browser and go to:
+
+Then open your browser and go to:
 http://localhost:5000
 
-Usage
+How to use it
 
+Enter a full URL (for example: https://www.wikipedia.org).
 
-Enter a full URL (for example: https://www.wikipedia.org)
+Click on "Generate hash".
 
-
-Click "Generate hash"
-
-
-You will see:
-
+The page will display:
 
 The generated hash (e.g., ab2a63)
 
+A command to check it using dig
 
-The command to verify it using dig
+A direct link for redirection
 
+Automatic redirection
 
-The direct redirection link
+Once a hash is created, you can open it directly in your browser:
 
-
-
-
-
-Automatic Redirection
-After creating a hash, you can access directly with:
 http://localhost:5000/<hash>
 
-The system will query the DNS (hash.jxvx.es) and redirect to the original URL.
 
-DNS Verification
-You can check the created TXT record using:
+The app will look up the DNS record (<hash>.jxvx.es) and redirect you to the original website automatically.
+
+Verifying the DNS record
+
+To verify that the TXT record has been created successfully, use this command:
+
 dig +short TXT <hash>.jxvx.es
 
 
-Project Structure
+It should return the original URL.
+
+Project structure
 DNS_Shortener/
 │
 ├── app.py
@@ -97,21 +101,19 @@ DNS_Shortener/
 └── templates/
     └── index.html
 
-
-Technologies Used
+Technologies used
 
 Python 3
 
-Flask
+Flask (for the web interface)
 
-Requests
+Requests (for API communication)
 
-dnspython
+dnspython (for DNS queries)
 
 IONOS DNS API
 
-
-
 Author
+
 Project developed by Javier Padial González
-for the module Network Services (SRI) – 2nd year ASIR
+for the subject Network Services (SRI) – 2nd year ASIR
