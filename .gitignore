@@ -1,0 +1,14 @@
+# Ignorar entornos virtuales
+venv/
+.env
+__pycache__/
+
+# Ignorar archivos temporales
+*.pyc
+*.log
+
+# Pero incluir todo el código fuente y templates
+!app.py
+!templates/
+!static/
+!README.md
