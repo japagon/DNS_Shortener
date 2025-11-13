@@ -24,13 +24,21 @@
       <p style="color:red;">{{ error }}</p>
     {% endif %}
 
-    {% if hash %}
-      <h2>Hash generado:</h2>
-      <p><strong>{{ hash }}</strong></p>
+{% if hash %}
+  <h2>Hash generado:</h2>
+  <p><strong>{{ hash }}</strong></p>
 
-      <h3>Prueba tu hash con dig:</h3>
-      <pre>dig +short TXT {{ hash }}.{{ domain }}</pre>
-    {% endif %}
+  <h3>Prueba tu hash con dig:</h3>
+  <pre>dig +short TXT {{ hash }}.{{ domain }}</pre>
+
+  <h3>Enlace directo:</h3>
+  <p>
+    <a href="/{{ hash }}" target="_blank">
+      http://localhost:5000/{{ hash }}
+    </a>
+  </p>
+{% endif %}
+
   </div>
 </body>
 </html>
